@@ -72,7 +72,8 @@ source("high_flow_K.R")
 high_flow_metrics_K
 high_flow_metrics_K(m=sager$model,o=sager$obs, month=sager$month, day=sager$day, year=sager$year, wy=sager$wy)
 
-# use different low flow months
+# use different high flow months
+#change from august to Nov - March
 high_flow_metrics_K(m=sager$model,o=sager$obs, month=sager$month, day=sager$day, year=sager$year, wy=sager$wy, high_flow_months = c(11:3))
 
 
