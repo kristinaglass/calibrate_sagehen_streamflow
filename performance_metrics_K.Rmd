@@ -15,7 +15,7 @@ library(ggpubr)
 
   
 ```{r simple}
-sager = read.table("sager.txt", header=T)
+sager = read.table("~/Documents/2_Areas/Areas_MEDS/Spring_Quarter/EDS230_Env_mod/ESM232_Examples_S24/Data/sager.txt", header=T)
 head(sager)
 
 # add date
@@ -128,17 +128,16 @@ perf
 ```
 
 
-# Calibration Not sharted yet
+# Calibration Not sharted yet--------------------^^above is pasted into other document
 
 File Name
 * sagerm.txt
 
 
-
 ```{r multipel}
 # multiple results - lets say we've run the model for multiple years, each column
 # is streamflow for a different parameter set
-msage = read.table("sagerm.txt", header=T)
+msage = read.table("~/Documents/2_Areas/Areas_MEDS/Spring_Quarter/EDS230_Env_mod/ESM232_Examples_S24/Data/sagerm.txt", header=T)
 
 # lets say we know the start date from our earlier output
 msage$date = sager$date
