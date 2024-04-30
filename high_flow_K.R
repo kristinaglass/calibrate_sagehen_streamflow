@@ -6,10 +6,10 @@
 #' @param  month month
 #' @param  day day
 #' @param  year year
-#' @param high_flow_months which to use default (August 8)
+#' @param high_flow_months which to use default (November - March, 11 - 3)
 #' @return annual_min_err, annual_min_corr, high_month_cor, high_month_err
 
-high_flow_metrics_K = function(m,o, month, day, year,wy, high_flow_months=8){
+high_flow_metrics_K = function(m,o, month, day, year,wy, high_flow_months=c(11:3)){
   
   flow = cbind.data.frame(m,o, month, day, year,wy)
   # first lets get maximum yearly values
