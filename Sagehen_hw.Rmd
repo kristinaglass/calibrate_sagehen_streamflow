@@ -1,9 +1,11 @@
 ---
 title: "Sagehen_HW"
 output: html_document
+author: "Flora & Kristina" 
 date: "2024-04-25"
 ---
 # Part 1: Come up with a combined metric that you think is interesting 
+See: combined metric file. We used equally weighted nse, rmse, and relerr. 
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -28,7 +30,7 @@ sagerl = sager %>% pivot_longer(cols=c("model","obs"), names_to="source",
 
 # basic plot
 ggplot(sagerl, aes(date, flow, col=source, linetype=source))+geom_line() +
-  labs(title= "Time Series of Observed and Modled Sagehen Creek Stream Flow", y = "Date", x = "Stream Flow (mm/day")
+  labs(title= "Time Series of Observed and Modled Sagehen Creek Stream Flow", y = "Date", x = "Stream Flow (mm/day)")
 ```
 
 
@@ -50,15 +52,8 @@ ggplot(sager, aes(obs, model))+geom_point()+geom_abline(intercept=0, slope=1, co
 
 ```{r}
 source("combined_metrics_K.R")
-
-#(m=sager$model, o=sager$obs)
-#source("../R/nse.R")
-
 source("nse.R")
-#source("../R/relerr.R")
 source("relerr.R")
-
-#source("../R/cper.R")
 source("cper.R")
 
 nse(m=sager$model, o=sager$obs)
@@ -73,13 +68,7 @@ combined_function(m=sager$model,o=sager$obs, weight.nse=0.33, weight.rmse=0.33, 
 # Scale and subsetting
 
 # We decided to subset for rainy season, which is known to be between Nov. 1 and March 31. in California; rainy season brings higher flow-rate 
-```{r}
-
-# # look at rainy season, Nov to March
-# sager_filtered <- sager %>% 
-#   filter(month %in% c(11, 12, 1, 2, 3)) %>%
-#   group_by(month, year) %>%
-#   summarize(model = sum(model), obs = sum(obs))
+```{r message = FALSE}
 
 # turn your evaluation metric into a function
 source("high_flow_K.R")
@@ -94,12 +83,11 @@ high_flow_metrics_K(m=sager$model,o=sager$obs, month=sager$month, day=sager$day,
 ```{r}
 #see combined_function
 combined_function(m=sager$model,o=sager$obs, weight.nse=0.33, weight.rmse=0.33, weight.relerr=0.34)
-
 ```
 
 # Part II Split Sample Calibration
 
-```{r}
+```{r message = FALSE, warning = FALSE}
 # multiple results - lets say we've run the model for multiple years, each column
 # is streamflow for a different parameter set
 msage = read.table("sagerm.txt", header=T)
@@ -125,8 +113,6 @@ pre_calibration_graph=ggplot(subset(msagel, wy >= 1970 & wy <= 1979), aes(as.Dat
 # lets add observed streamflow
 pre_calibration_graph+geom_line(data=subset(sager,  wy >= 1970 & wy <= 1979), aes(as.Date(date), obs), size=2, col="black", linetype=2)+ labs(title = "Pre Calibration of Sagehen Creek Streamflow from 1970 - 1979", x = "Date", y = "Streamflow (mm/day)")
 
-#res = msage %>% select(!c("date","month","year","day","wy")) %>%
-#      map_dbl(nse, o=sager$obs )
 
 # using our high flow statistics use apply to compute for all the data using the updated flow metrics routing that also computed combined metrics
 
@@ -164,7 +150,7 @@ ggplot(subset(msagel, run == "V127"), aes(x= date, flow)) +
 # Compute and plot how the performance of the model using the best parameter set changed in pre and post calibration periods
 
 
-```{r}
+```{r message = FALSE, warning = FALSE}
 #performance for pre calibration period
 #performance for post calibration period 
 
@@ -173,24 +159,15 @@ ggplot(subset(msagel, run == "V127"), aes(x= date, flow)) +
 pre_combined_func <- combined_function(pre_calibration[["V127"]], sager$obs)
 post_combined_func <- combined_function(post_calibration[["V127"]], sager$obs)
 
+# Prep plot
+both_combine <- data.frame(calibration = c("Pre", "Post"), combined = c(pre_combined_func, post_combined_func))
 
-# Prepare data for plotting
-combine_data <- data.frame(
-  Calibration = c("Pre", "Post"),
-  combined = c(pre_combined_func, post_combined_func)
-)
-
-# Plot the changes in combined metrics from pre to post calibration
-ggplot(combine_data, aes(x = Calibration, y = combined , fill = Calibration)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  labs(title = "Model Performance Chang Pre vs Post Calibration",
-       x = "Calibration Period",
-       y = "Combined Metric") +
-  theme_minimal()
+# Plot changes in combined metrics, pre & post calibration
+ggplot(both_combine, aes(x = calibration, y = combined , fill = calibration)) + geom_bar(stat = "identity", position = "dodge") + labs(title = "Model Performance Pre vs Post Calibration", x = "Calibration Period", y = "Combined Metric")
 
 ```
 
 
 Write 2-3 sentences to explain your metric design and comment on model performance based on your metric
 
-**All three metrics chosen have different strengths in evaluating model performance, including errors within the model and model efficiency. Based on the above results, the model performed slightly better for the Pre-Calibration data compared to the Post-Calibration data. This may require further adjustments of the model to improve performance Post-Calibration**
+**All three metrics chosen to create the combined metric have different strengths in evaluating model performance, including errors within the model and model efficiency. We chose to weight nse, rmse, and relerr equally (1/3, 1/3, ~1/3). Based on the above results, the model performed slightly better  for the Pre-Calibration data (~0.29) compared to the Post-Calibration data (~0.3). This makes sense, as we noticed that the post calibration years had a lot more variation in their data than pre-calibration years. This may require further adjustments of the model to improve performance Post-Calibration results**
